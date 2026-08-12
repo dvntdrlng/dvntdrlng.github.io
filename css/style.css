@@ -159,76 +159,81 @@ body {
             }
 
 
-        /* Pink distortion */
+                    @keyframes glitch-pink {
 
-        @keyframes glitch-pink {
+                0% {
+                    opacity: 0;
+                    transform: translate(0);
+                }
 
-            0% {
-                opacity: 0;
-                transform: translate(0);
+                15% {
+                    opacity: 0.8;
+                    transform: translate(-5px, 0);
+                }
+
+                30% {
+                    opacity: 0;
+                    transform: translate(4px, 2px);
+                }
+
+                45% {
+                    opacity: 0.7;
+                    transform: translate(-4px, -2px);
+                }
+
+                60% {
+                    opacity: 0;
+                    transform: translate(6px, 0);
+                }
+
+                75% {
+                    opacity: 0.85;
+                    transform: translate(-3px, 1px);
+                }
+
+                100% {
+                    opacity: 0;
+                    transform: translate(0);
+                }
             }
 
-            20% {
-                opacity: 0.55;
-                transform: translate(-3px, 0);
+            @keyframes glitch-blue {
+
+                0% {
+                    opacity: 0;
+                    transform: translate(0);
+                }
+
+                15% {
+                    opacity: 0.8;
+                    transform: translate(5px, 0);
+                }
+
+                30% {
+                    opacity: 0;
+                    transform: translate(-4px, -2px);
+                }
+
+                45% {
+                    opacity: 0.7;
+                    transform: translate(4px, 2px);
+                }
+
+                60% {
+                    opacity: 0;
+                    transform: translate(-6px, 0);
+                }
+
+                75% {
+                    opacity: 0.85;
+                    transform: translate(3px, -1px);
+                }
+
+                100% {
+                    opacity: 0;
+                    transform: translate(0);
+                }
             }
-
-            40% {
-                opacity: 0;
-                transform: translate(2px, 1px);
-            }
-
-            60% {
-                opacity: 0.45;
-                transform: translate(-2px, -1px);
-            }
-
-            80% {
-                opacity: 0;
-                transform: translate(1px, 0);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translate(0);
-            }
-        }
-
-
-        /* Blue distortion */
-
-        @keyframes glitch-blue {
-
-            0% {
-                opacity: 0;
-                transform: translate(0);
-            }
-
-            20% {
-                opacity: 0.55;
-                transform: translate(3px, 0);
-            }
-
-            40% {
-                opacity: 0;
-                transform: translate(-2px, -1px);
-            }
-
-            60% {
-                opacity: 0.45;
-                transform: translate(2px, 1px);
-            }
-
-            80% {
-                opacity: 0;
-                transform: translate(-1px, 0);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translate(0);
-            }
-        }
 
 
 /* =========================
@@ -389,6 +394,140 @@ body {
     color: var(--black);
 }
 
+}
+
+/* =========================
+MOBILE MENU GLITCH
+========================= */
+
+.mobile-menu a {
+    position: relative;
+    z-index: 0;
+
+    color: var(--yellow);
+
+    font-family: Helvetica, Arial, sans-serif;
+
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+}
+
+/* Glitch copies */
+
+.mobile-menu a::before,
+.mobile-menu a::after {
+    content: attr(data-text);
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+
+    pointer-events: none;
+
+    opacity: 0;
+
+    z-index: -1;
+}
+
+/* Pink */
+
+.mobile-menu a::before {
+    color: var(--glitch-pink);
+}
+
+/* Blue */
+
+.mobile-menu a::after {
+    color: var(--glitch-blue);
+}
+
+/* Stronger glitch */
+
+.mobile-menu a:hover::before {
+    animation: mobile-glitch-pink 0.7s steps(6, end);
+}
+
+.mobile-menu a:hover::after {
+    animation: mobile-glitch-blue 0.7s steps(6, end);
+}
+
+@keyframes mobile-glitch-pink {
+
+    0% {
+        opacity: 0;
+        transform: translate(0);
+    }
+
+    15% {
+        opacity: 0.8;
+        transform: translate(-5px, 0);
+    }
+
+    30% {
+        opacity: 0;
+        transform: translate(4px, 2px);
+    }
+
+    45% {
+        opacity: 0.7;
+        transform: translate(-4px, -2px);
+    }
+
+    60% {
+        opacity: 0;
+        transform: translate(6px, 0);
+    }
+
+    75% {
+        opacity: 0.85;
+        transform: translate(-3px, 1px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(0);
+    }
+}
+
+@keyframes mobile-glitch-blue {
+
+    0% {
+        opacity: 0;
+        transform: translate(0);
+    }
+
+    15% {
+        opacity: 0.8;
+        transform: translate(5px, 0);
+    }
+
+    30% {
+        opacity: 0;
+        transform: translate(-4px, -2px);
+    }
+
+    45% {
+        opacity: 0.7;
+        transform: translate(4px, 2px);
+    }
+
+    60% {
+        opacity: 0;
+        transform: translate(-6px, 0);
+    }
+
+    75% {
+        opacity: 0.85;
+        transform: translate(3px, -1px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(0);
+    }
 }
 
 /* =========================
