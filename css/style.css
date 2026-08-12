@@ -1,5 +1,5 @@
 @font-face {
-    font-family: "base05";
+    font-family: "BASE05";
     src: url("../assets/fonts/BASE05.woff2") format("woff2");
     font-weight: normal;
     font-style: normal;
@@ -713,7 +713,7 @@ body {
 .section h2 {
     margin: 0 0 50px;
 
-    font-family: "base05", sans-serif;
+    font-family: "BASE05", sans-serif;
 
     font-size: clamp(2.5rem, 6vw, 5rem);
 
@@ -755,7 +755,7 @@ body {
 .feature-card h3 {
     margin: 0 0 10px;
 
-    font-family: "base05", sans-serif;
+    font-family: "BASE05", sans-serif;
 
     font-size: 1.8rem;
 
@@ -928,7 +928,7 @@ footer {
 .page-hero h1 {
     margin: 0 0 30px;
 
-    font-family: "base05", sans-serif;
+    font-family: "BASE05", sans-serif;
 
     font-size: clamp(3.5rem, 9vw, 8rem);
 
