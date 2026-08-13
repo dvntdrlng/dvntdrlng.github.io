@@ -350,6 +350,18 @@ document.addEventListener("DOMContentLoaded", function () {
         mobileMenu.classList.toggle("open");
     });
 
+    document.addEventListener("click", function (event) {
+
+        if (
+            mobileMenu.classList.contains("open") &&
+            !mobileMenu.contains(event.target) &&
+            !menuButton.contains(event.target)
+        ) {
+            mobileMenu.classList.remove("open");
+        }
+
+    });
+
 });
 </script>
 
