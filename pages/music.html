@@ -94,17 +94,35 @@
         <section class="music-player-section">
 
 
+    <section class="music-player-section">
+
+
     <div class="audio-player">
 
-        <div class="track-info">
-            <div class="track-title">
-                BND — BROKEN NOT DEFEATED
+        <!-- CURRENT TRACK -->
+
+        <div class="current-track">
+
+            <div class="track-number" id="currentTrackNumber">
+                01
             </div>
 
-            <div class="track-meta">
-                DRUM &amp; BASS · HIP HOP · 174 BPM
+            <div class="current-track-info">
+
+                <div class="track-title" id="currentTrackTitle">
+                    BND — BROKEN NOT DEFEATED
+                </div>
+
+                <div class="track-meta" id="currentTrackMeta">
+                    DRUM &amp; BASS · HIP HOP · 174 BPM
+                </div>
+
             </div>
+
         </div>
+
+
+        <!-- PLAYER -->
 
         <div class="player-controls">
 
@@ -112,19 +130,91 @@
                 ▶
             </button>
 
-            <div class="progress-container" id="progressContainer">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
+            <div class="progress-wrapper">
 
-            <div class="time" id="time">
-                0:00
+                <div class="progress-container" id="progressContainer">
+
+                    <canvas
+                        class="eq-visualizer"
+                        id="eqVisualizer"
+                    ></canvas>
+
+                    <div
+                        class="progress-bar"
+                        id="progressBar"
+                    ></div>
+
+                </div>
+
+                <div class="time-row">
+
+                    <span id="time">
+                        0:00
+                    </span>
+
+                    <span id="duration">
+                        0:00
+                    </span>
+
+                </div>
+
             </div>
 
         </div>
 
-        <audio id="audio" src="../assets/audio/bnd.mp3"></audio>
+
+        <!-- TRACK LIST -->
+
+        <div class="track-list">
+
+            <button
+                class="track-item active"
+                data-track="0"
+            >
+
+                <span class="track-index">
+                    01
+                </span>
+
+                <span class="track-name">
+                    BND — BROKEN NOT DEFEATED
+                </span>
+
+                <span class="track-type">
+                    DNB / HIP HOP
+                </span>
+
+            </button>
+
+
+            <button
+                class="track-item"
+                data-track="1"
+            >
+
+                <span class="track-index">
+                    02
+                </span>
+
+                <span class="track-name">
+                    JAGGHEAD
+                </span>
+
+                <span class="track-type">
+                    DRUM &amp; BASS
+                </span>
+
+            </button>
+
+        </div>
+
+
+        <audio id="audio"></audio>
 
     </div>
+
+</section>
+
 
 </section>
 
@@ -189,72 +279,517 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script>
 
-const audio = document.getElementById("audio");
-const playButton = document.getElementById("playButton");
-const progressContainer = document.getElementById("progressContainer");
-const progressBar = document.getElementById("progressBar");
-const time = document.getElementById("time");
+const tracks = [
 
+    {
+        title: "BND — BROKEN NOT DEFEATED",
+        meta: "DRUM & BASS · HIP HOP · 174 BPM",
+        file: "../assets/audio/bnd.mp3"
+    },
 
-playButton.addEventListener("click", function () {
-
-    if (audio.paused) {
-
-        audio.play();
-        playButton.textContent = "❚❚";
-
-    } else {
-
-        audio.pause();
-        playButton.textContent = "▶";
-
+    {
+        title: "JAGGHEAD",
+        meta: "DRUM & BASS",
+        file: "../assets/audio/Jagghead.mp3"
     }
 
-});
+];
 
 
-audio.addEventListener("timeupdate", function () {
+const audio = document.getElementById("audio");
 
-    const progress =
-        (audio.currentTime / audio.duration) * 100;
+const playButton =
+    document.getElementById("playButton");
 
-    progressBar.style.width = progress + "%";
+const progressContainer =
+    document.getElementById("progressContainer");
 
-    const minutes =
-        Math.floor(audio.currentTime / 60);
+const progressBar =
+    document.getElementById("progressBar");
 
-    const seconds =
-        Math.floor(audio.currentTime % 60)
-        .toString()
-        .padStart(2, "0");
+const time =
+    document.getElementById("time");
 
-    time.textContent = minutes + ":" + seconds;
+const duration =
+    document.getElementById("duration");
 
-});
+const currentTrackTitle =
+    document.getElementById("currentTrackTitle");
 
+const currentTrackMeta =
+    document.getElementById("currentTrackMeta");
 
-progressContainer.addEventListener("click", function (event) {
+const currentTrackNumber =
+    document.getElementById("currentTrackNumber");
 
-    const width = progressContainer.clientWidth;
-
-    const clickX = event.offsetX;
-
-    const duration = audio.duration;
-
-    audio.currentTime =
-        (clickX / width) * duration;
-
-});
+const trackItems =
+    document.querySelectorAll(".track-item");
 
 
-audio.addEventListener("ended", function () {
+let currentTrack = 0;
 
-    playButton.textContent = "▶";
+
+/* =========================
+LOAD TRACK
+========================= */
+
+function loadTrack(index) {
+
+    currentTrack = index;
+
+    const track = tracks[index];
+
+    audio.src = track.file;
+
+    currentTrackTitle.textContent =
+        track.title;
+
+    currentTrackMeta.textContent =
+        track.meta;
+
+    currentTrackNumber.textContent =
+        String(index + 1).padStart(2, "0");
+
+
+    trackItems.forEach((item, i) => {
+
+        item.classList.toggle(
+            "active",
+            i === index
+        );
+
+    });
+
 
     progressBar.style.width = "0%";
 
+    time.textContent = "0:00";
+
+}
+
+
+/* =========================
+PLAY / PAUSE
+========================= */
+
+playButton.addEventListener(
+    "click",
+    function () {
+
+        if (audio.paused) {
+
+            audio.play();
+
+            playButton.textContent = "❚❚";
+
+        } else {
+
+            audio.pause();
+
+            playButton.textContent = "▶";
+
+        }
+
+    }
+);
+
+
+/* =========================
+TRACK SELECTION
+========================= */
+
+trackItems.forEach((item) => {
+
+    item.addEventListener(
+        "click",
+        function () {
+
+            const index =
+                Number(item.dataset.track);
+
+            loadTrack(index);
+
+            audio.play();
+
+            playButton.textContent = "❚❚";
+
+        }
+    );
+
 });
 
+
+/* =========================
+PROGRESS
+========================= */
+
+audio.addEventListener(
+    "timeupdate",
+    function () {
+
+        if (!audio.duration) return;
+
+        const progress =
+            (audio.currentTime /
+            audio.duration) * 100;
+
+        progressBar.style.width =
+            progress + "%";
+
+
+        const minutes =
+            Math.floor(
+                audio.currentTime / 60
+            );
+
+        const seconds =
+            Math.floor(
+                audio.currentTime % 60
+            )
+            .toString()
+            .padStart(2, "0");
+
+
+        time.textContent =
+            minutes + ":" + seconds;
+
+    }
+);
+
+
+/* =========================
+DURATION
+========================= */
+
+audio.addEventListener(
+    "loadedmetadata",
+    function () {
+
+        const minutes =
+            Math.floor(
+                audio.duration / 60
+            );
+
+        const seconds =
+            Math.floor(
+                audio.duration % 60
+            )
+            .toString()
+            .padStart(2, "0");
+
+
+        duration.textContent =
+            minutes + ":" + seconds;
+
+    }
+);
+
+
+/* =========================
+SEEK
+========================= */
+
+progressContainer.addEventListener(
+    "click",
+    function (event) {
+
+        if (!audio.duration) return;
+
+        const width =
+            progressContainer.clientWidth;
+
+        const clickX =
+            event.offsetX;
+
+        audio.currentTime =
+            (clickX / width) *
+            audio.duration;
+
+    }
+);
+
+
+/* =========================
+NEXT TRACK
+========================= */
+
+audio.addEventListener(
+    "ended",
+    function () {
+
+        const nextTrack =
+            (currentTrack + 1) %
+            tracks.length;
+
+        loadTrack(nextTrack);
+
+        audio.play();
+
+        playButton.textContent = "❚❚";
+
+    }
+);
+
+
+/* =========================
+INITIAL TRACK
+========================= */
+
+loadTrack(0);
+
+</script>
+
+<script>
+
+const audio = document.getElementById("audio");
+const canvas = document.getElementById("eqVisualizer");
+const ctx = canvas.getContext("2d");
+
+let audioContext;
+let analyser;
+let source;
+let frequencyData;
+
+const BAND_COUNT = 64;
+
+
+/* =========================
+INITIALISE AUDIO ANALYSER
+========================= */
+
+function initVisualizer() {
+
+    if (audioContext) return;
+
+    audioContext =
+        new (window.AudioContext ||
+             window.webkitAudioContext)();
+
+    analyser =
+        audioContext.createAnalyser();
+
+    analyser.fftSize = 2048;
+
+    analyser.smoothingTimeConstant = 0.72;
+
+    source =
+        audioContext.createMediaElementSource(audio);
+
+    source.connect(analyser);
+
+    analyser.connect(
+        audioContext.destination
+    );
+
+    frequencyData =
+        new Uint8Array(
+            analyser.frequencyBinCount
+        );
+
+}
+
+
+/* =========================
+CANVAS SIZE
+========================= */
+
+function resizeVisualizer() {
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+    canvas.width =
+        rect.width * window.devicePixelRatio;
+
+    canvas.height =
+        rect.height * window.devicePixelRatio;
+
+    ctx.setTransform(
+        window.devicePixelRatio,
+        0,
+        0,
+        window.devicePixelRatio,
+        0,
+        0
+    );
+
+}
+
+window.addEventListener(
+    "resize",
+    resizeVisualizer
+);
+
+resizeVisualizer();
+
+
+/* =========================
+DRAW EQ
+========================= */
+
+function drawVisualizer() {
+
+    requestAnimationFrame(
+        drawVisualizer
+    );
+
+    if (!analyser) return;
+
+    analyser.getByteFrequencyData(
+        frequencyData
+    );
+
+
+    const width =
+        canvas.clientWidth;
+
+    const height =
+        canvas.clientHeight;
+
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    const barWidth =
+        width / BAND_COUNT;
+
+
+    /*
+     * Track progression
+     *
+     * 0 → 1 across the song
+     */
+
+    const progress =
+        audio.duration
+            ? audio.currentTime /
+              audio.duration
+            : 0;
+
+
+    for (
+        let i = 0;
+        i < BAND_COUNT;
+        i++
+    ) {
+
+        /*
+         * Spread the 64 bands across
+         * the useful frequency range.
+         */
+
+        const index =
+            Math.floor(
+                Math.pow(
+                    i / BAND_COUNT,
+                    1.7
+                ) *
+                frequencyData.length
+            );
+
+
+        const value =
+            frequencyData[index] / 255;
+
+
+        /*
+         * Give quieter frequencies
+         * a little extra life.
+         */
+
+        const boosted =
+            Math.pow(value, 0.72);
+
+
+        const barHeight =
+            boosted * height * 0.9;
+
+
+        /*
+         * Colour changes with:
+         *
+         * - frequency position
+         * - song progression
+         */
+
+        const hue =
+            (
+                35 +
+                (i / BAND_COUNT) * 170 +
+                progress * 120
+            ) % 360;
+
+
+        const saturation =
+            100;
+
+        const lightness =
+            55 +
+            boosted * 20;
+
+
+        ctx.fillStyle =
+            `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+
+
+        /*
+         * Tiny gaps between bars
+         */
+
+        const x =
+            i * barWidth;
+
+        const gap = 1;
+
+
+        ctx.fillRect(
+
+            x + gap,
+
+            height - barHeight,
+
+            Math.max(
+                1,
+                barWidth - gap * 2
+            ),
+
+            barHeight
+
+        );
+
+    }
+
+}
+
+drawVisualizer();
+
+
+/* =========================
+START AUDIO CONTEXT
+========================= */
+
+audio.addEventListener(
+    "play",
+    () => {
+
+        initVisualizer();
+
+        if (
+            audioContext.state ===
+            "suspended"
+        ) {
+
+            audioContext.resume();
+
+        }
+
+    }
+);
 
 </script>
 

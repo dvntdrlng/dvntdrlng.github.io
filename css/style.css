@@ -1088,74 +1088,458 @@ AUDIO PLAYER
 ========================= */
 
 .audio-player {
+
     width: 100%;
-    max-width: 800px;
-    margin: 40px auto;
+    max-width: 900px;
+
+    margin: 50px auto;
+
+    border: 1px solid rgba(255,255,255,0.18);
+
+    background: #00060E;
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+/* =========================
+CURRENT TRACK
+========================= */
+
+.current-track {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 25px;
+
     padding: 30px;
 
-    border: 1px solid rgba(255, 255, 255, 0.2);
-
-    background: rgba(0, 0, 0, 0.4);
+    border-bottom:
+        1px solid rgba(255,255,255,0.12);
 }
 
-.track-title {
-    font-size: 1.4rem;
-    letter-spacing: 0.05em;
-}
 
-.track-meta {
-    margin-top: 8px;
+.track-number {
 
     font-size: 0.75rem;
-    letter-spacing: 0.1em;
 
-    opacity: 0.6;
+    color: var(--yellow);
+
+    letter-spacing: 0.1em;
 }
+
+
+.current-track-info {
+
+    flex: 1;
+}
+
+
+.track-title {
+
+    font-size: 1.4rem;
+
+    letter-spacing: 0.06em;
+
+    font-weight: bold;
+}
+
+
+.track-meta {
+
+    margin-top: 8px;
+
+    font-size: 0.7rem;
+
+    letter-spacing: 0.12em;
+
+    opacity: 0.55;
+}
+
+
+/* =========================
+CONTROLS
+========================= */
 
 .player-controls {
-    display: flex;
-    align-items: center;
-    gap: 15px;
 
-    margin-top: 25px;
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 25px 30px;
 }
 
+
 .play-button {
-    width: 45px;
-    height: 45px;
+
+    width: 50px;
+    height: 50px;
 
     border: none;
 
     background: var(--yellow);
+
     color: #000;
 
+    font-size: 1rem;
+
     cursor: pointer;
 
-    font-size: 1rem;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
 }
 
-.progress-container {
-    position: relative;
+
+.play-button:hover {
+    animation: play-button-glitch 0.45s steps(8, end);
+}
+
+@keyframes play-button-glitch {
+
+    0% {
+        transform: translate(0, 0);
+        box-shadow:
+            0 0 0 transparent,
+            0 0 0 transparent;
+    }
+
+    10% {
+        transform: translate(-3px, 1px);
+        box-shadow:
+            4px 0 0 var(--glitch-pink),
+            -4px 0 0 var(--glitch-blue);
+    }
+
+    20% {
+        transform: translate(3px, -2px);
+        box-shadow:
+            -5px 2px 0 var(--glitch-pink),
+            5px -2px 0 var(--glitch-blue);
+    }
+
+    30% {
+        transform: translate(-2px, 2px);
+        box-shadow:
+            3px -2px 0 var(--glitch-pink),
+            -3px 2px 0 var(--glitch-blue);
+    }
+
+    40% {
+        transform: translate(4px, 0);
+        box-shadow:
+            -6px 0 0 var(--glitch-pink),
+            6px 1px 0 var(--glitch-blue);
+    }
+
+    50% {
+        transform: translate(-4px, -1px);
+        box-shadow:
+            5px 2px 0 var(--glitch-pink),
+            -5px -2px 0 var(--glitch-blue);
+    }
+
+    60% {
+        transform: translate(2px, 2px);
+        box-shadow:
+            -3px 0 0 var(--glitch-pink),
+            4px 0 0 var(--glitch-blue);
+    }
+
+    70% {
+        transform: translate(-3px, -2px);
+        box-shadow:
+            5px -1px 0 var(--glitch-pink),
+            -5px 1px 0 var(--glitch-blue);
+    }
+
+    80% {
+        transform: translate(2px, 1px);
+        box-shadow:
+            -4px 0 0 var(--glitch-pink),
+            4px 0 0 var(--glitch-blue);
+    }
+
+    90% {
+        transform: translate(-1px, 0);
+        box-shadow:
+            2px 0 0 var(--glitch-pink),
+            -2px 0 0 var(--glitch-blue);
+    }
+
+    100% {
+        transform: translate(0, 0);
+        box-shadow:
+            0 0 0 transparent,
+            0 0 0 transparent;
+    }
+}
+
+
+.progress-wrapper {
 
     flex: 1;
+}
 
-    height: 5px;
 
-    background: rgba(255, 255, 255, 0.2);
+.progress-container {
+    width: 100%;
+    height: 32px;
+
+    background:
+        rgba(255,255,255,0.08);
 
     cursor: pointer;
+
+    position: relative;
+
+    overflow: hidden;
 }
+
+
+.eq-visualizer {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+
+    z-index: 2;
+}
+
 
 .progress-bar {
     width: 0%;
     height: 100%;
 
     background: var(--yellow);
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    z-index: 1;
+
+    opacity: 0.18;
 }
 
-.time {
-    min-width: 40px;
 
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
+/* Little glitch tail */
+
+.progress-bar::after {
+    content: "";
+
+    position: absolute;
+
+    right: 0;
+    top: -2px;
+
+    width: 4px;
+    height: 10px;
+
+    background: var(--glitch-pink);
+}
+
+
+.progress-bar {
+
+    width: 0%;
+
+    height: 100%;
+
+    background: var(--yellow);
+
+    position: relative;
+}
+
+
+/* Little glitch tail */
+
+.progress-bar::after {
+
+    content: "";
+
+    position: absolute;
+
+    right: 0;
+
+    top: -2px;
+
+    width: 4px;
+
+    height: 10px;
+
+    background: var(--glitch-pink);
+
+}
+
+
+.time-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-top: 8px;
+
+    font-size: 0.65rem;
+
+    opacity: 0.5;
+
+    letter-spacing: 0.08em;
+}
+
+
+/* =========================
+TRACK LIST
+========================= */
+
+.track-list {
+
+    border-top:
+        1px solid rgba(255,255,255,0.12);
+}
+
+
+.track-item {
+
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+        45px 1fr auto;
+
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 18px 30px;
+
+    background: transparent;
+
+    color: white;
+
+    border: none;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.08);
+
+    text-align: left;
+
+    cursor: pointer;
+
+    font-family: inherit;
+
+    transition:
+        background 0.15s ease,
+        padding 0.15s ease;
+}
+
+
+.track-item:hover {
+
+    background:
+        rgba(255,255,255,0.04);
+
+    padding-left: 35px;
+}
+
+
+.track-item.active {
+
+    background:
+        rgba(255,174,13,0.08);
+
+    border-left:
+        3px solid var(--yellow);
+}
+
+
+.track-index {
+
+    font-size: 0.7rem;
+
+    color: var(--yellow);
+
+    letter-spacing: 0.08em;
+}
+
+
+.track-name {
+
+    font-size: 0.85rem;
+
+    letter-spacing: 0.04em;
+}
+
+
+.track-type {
+
+    font-size: 0.6rem;
+
+    letter-spacing: 0.1em;
+
+    opacity: 0.45;
+}
+
+
+/* mobile audio player */
+
+@media (max-width: 700px) {
+
+    .audio-player {
+        margin: 30px 0;
+    }
+
+
+    .current-track {
+        padding: 22px;
+
+        gap: 15px;
+    }
+
+
+    .track-title {
+        font-size: 1rem;
+    }
+
+
+    .track-meta {
+        font-size: 0.6rem;
+    }
+
+
+    .player-controls {
+        padding: 20px;
+    }
+
+
+    .track-item {
+
+        grid-template-columns:
+            35px 1fr;
+
+        gap: 12px;
+
+        padding: 16px 20px;
+
+    }
+
+
+    .track-type {
+        display: none;
+    }
+
 }
