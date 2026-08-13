@@ -91,6 +91,42 @@
 
         </section>
 
+        <section class="music-player-section">
+
+
+    <div class="audio-player">
+
+        <div class="track-info">
+            <div class="track-title">
+                BND — BROKEN NOT DEFEATED
+            </div>
+
+            <div class="track-meta">
+                DRUM &amp; BASS · HIP HOP · 174 BPM
+            </div>
+        </div>
+
+        <div class="player-controls">
+
+            <button class="play-button" id="playButton">
+                ▶
+            </button>
+
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="time" id="time">
+                0:00
+            </div>
+
+        </div>
+
+        <audio id="audio" src="../assets/audio/bnd.mp3"></audio>
+
+    </div>
+
+</section>
 
         <section class="section">
 
@@ -149,6 +185,77 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 });
+</script>
+
+<script>
+
+const audio = document.getElementById("audio");
+const playButton = document.getElementById("playButton");
+const progressContainer = document.getElementById("progressContainer");
+const progressBar = document.getElementById("progressBar");
+const time = document.getElementById("time");
+
+
+playButton.addEventListener("click", function () {
+
+    if (audio.paused) {
+
+        audio.play();
+        playButton.textContent = "❚❚";
+
+    } else {
+
+        audio.pause();
+        playButton.textContent = "▶";
+
+    }
+
+});
+
+
+audio.addEventListener("timeupdate", function () {
+
+    const progress =
+        (audio.currentTime / audio.duration) * 100;
+
+    progressBar.style.width = progress + "%";
+
+    const minutes =
+        Math.floor(audio.currentTime / 60);
+
+    const seconds =
+        Math.floor(audio.currentTime % 60)
+        .toString()
+        .padStart(2, "0");
+
+    time.textContent = minutes + ":" + seconds;
+
+});
+
+
+progressContainer.addEventListener("click", function (event) {
+
+    const width = progressContainer.clientWidth;
+
+    const clickX = event.offsetX;
+
+    const duration = audio.duration;
+
+    audio.currentTime =
+        (clickX / width) * duration;
+
+});
+
+
+audio.addEventListener("ended", function () {
+
+    playButton.textContent = "▶";
+
+    progressBar.style.width = "0%";
+
+});
+
+
 </script>
 
 </body>
