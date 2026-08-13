@@ -262,535 +262,720 @@
 
     </footer>
 
-<script>
+    <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-    const menuButton = document.querySelector(".mobile-menu-toggle");
-    const mobileMenu = document.querySelector(".mobile-menu");
+    /* =========================
+       MOBILE MENU
+       ========================= */
 
-    if (!menuButton || !mobileMenu) return;
+    const menuButton =
+        document.querySelector(".mobile-menu-toggle");
 
-    menuButton.addEventListener("click", function () {
-        mobileMenu.classList.toggle("open");
-    });
+    const mobileMenu =
+        document.querySelector(".mobile-menu");
 
-});
-</script>
+    if (menuButton && mobileMenu) {
 
-<script>
+        menuButton.addEventListener(
+            "click",
+            function () {
 
-const tracks = [
+                mobileMenu.classList.toggle("open");
 
-    {
-        title: "BND — BROKEN NOT DEFEATED",
-        meta: "DRUM & BASS · HIP HOP · 174 BPM",
-        file: "../assets/audio/bnd.mp3"
-    },
-
-    {
-        title: "JAGGHEAD",
-        meta: "DRUM & BASS",
-        file: "../assets/audio/Jagghead.mp3"
-    }
-
-];
-
-
-const audio = document.getElementById("audio");
-
-const playButton =
-    document.getElementById("playButton");
-
-const progressContainer =
-    document.getElementById("progressContainer");
-
-const progressBar =
-    document.getElementById("progressBar");
-
-const time =
-    document.getElementById("time");
-
-const duration =
-    document.getElementById("duration");
-
-const currentTrackTitle =
-    document.getElementById("currentTrackTitle");
-
-const currentTrackMeta =
-    document.getElementById("currentTrackMeta");
-
-const currentTrackNumber =
-    document.getElementById("currentTrackNumber");
-
-const trackItems =
-    document.querySelectorAll(".track-item");
-
-
-let currentTrack = 0;
-
-
-/* =========================
-LOAD TRACK
-========================= */
-
-function loadTrack(index) {
-
-    currentTrack = index;
-
-    const track = tracks[index];
-
-    audio.src = track.file;
-
-    currentTrackTitle.textContent =
-        track.title;
-
-    currentTrackMeta.textContent =
-        track.meta;
-
-    currentTrackNumber.textContent =
-        String(index + 1).padStart(2, "0");
-
-
-    trackItems.forEach((item, i) => {
-
-        item.classList.toggle(
-            "active",
-            i === index
+            }
         );
 
-    });
+    }
 
 
-    progressBar.style.width = "0%";
+    /* =========================
+       TRACK DATA
+       ========================= */
 
-    time.textContent = "0:00";
+    const tracks = [
 
-}
+        {
+            title: "BND — BROKEN NOT DEFEATED",
+            meta: "DRUM & BASS · HIP HOP · 174 BPM",
+            file: "../assets/audio/bnd.mp3"
+        },
+
+        {
+            title: "JAGGHEAD",
+            meta: "DRUM & BASS",
+            file: "../assets/audio/Jagghead.mp3"
+        }
+
+    ];
 
 
-/* =========================
-PLAY / PAUSE
-========================= */
+    /* =========================
+       PLAYER ELEMENTS
+       ========================= */
 
-playButton.addEventListener(
-    "click",
-    function () {
+    const audio =
+        document.getElementById("audio");
 
-        if (audio.paused) {
+    const playButton =
+        document.getElementById("playButton");
 
-            audio.play();
+    const progressContainer =
+        document.getElementById("progressContainer");
 
-            playButton.textContent = "❚❚";
+    const progressBar =
+        document.getElementById("progressBar");
 
-        } else {
+    const time =
+        document.getElementById("time");
 
-            audio.pause();
+    const duration =
+        document.getElementById("duration");
 
-            playButton.textContent = "▶";
+    const currentTrackTitle =
+        document.getElementById("currentTrackTitle");
+
+    const currentTrackMeta =
+        document.getElementById("currentTrackMeta");
+
+    const currentTrackNumber =
+        document.getElementById("currentTrackNumber");
+
+    const trackItems =
+        document.querySelectorAll(".track-item");
+
+
+    /* =========================
+       EQ ELEMENTS
+       ========================= */
+
+    const canvas =
+        document.getElementById("eqVisualizer");
+
+    const ctx =
+        canvas
+            ? canvas.getContext("2d")
+            : null;
+
+
+    let audioContext = null;
+    let analyser = null;
+    let source = null;
+    let frequencyData = null;
+
+
+    const BAND_COUNT = 64;
+
+
+    let currentTrack = 0;
+
+
+    /* =========================
+       SAFETY CHECK
+       ========================= */
+
+    if (
+        !audio ||
+        !playButton ||
+        !progressContainer ||
+        !progressBar
+    ) {
+
+        console.error(
+            "Audio player elements missing."
+        );
+
+        return;
+
+    }
+
+
+    /* =========================
+       LOAD TRACK
+       ========================= */
+
+    function loadTrack(index) {
+
+        currentTrack = index;
+
+        const track = tracks[index];
+
+        audio.src = track.file;
+
+        if (currentTrackTitle) {
+            currentTrackTitle.textContent =
+                track.title;
+        }
+
+        if (currentTrackMeta) {
+            currentTrackMeta.textContent =
+                track.meta;
+        }
+
+        if (currentTrackNumber) {
+            currentTrackNumber.textContent =
+                String(index + 1).padStart(2, "0");
+        }
+
+
+        trackItems.forEach(
+            (item, i) => {
+
+                item.classList.toggle(
+                    "active",
+                    i === index
+                );
+
+            }
+        );
+
+
+        progressBar.style.width =
+            "0%";
+
+        time.textContent =
+            "0:00";
+
+        duration.textContent =
+            "0:00";
+
+    }
+
+
+    /* =========================
+       INITIALISE VISUALISER
+       ========================= */
+
+    function initVisualizer() {
+
+        if (
+            audioContext ||
+            !canvas ||
+            !ctx
+        ) {
+            return;
+        }
+
+
+        audioContext =
+            new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+
+
+        analyser =
+            audioContext.createAnalyser();
+
+
+        analyser.fftSize =
+            2048;
+
+
+        analyser.smoothingTimeConstant =
+            0.72;
+
+
+        source =
+            audioContext.createMediaElementSource(
+                audio
+            );
+
+
+        source.connect(
+            analyser
+        );
+
+
+        analyser.connect(
+            audioContext.destination
+        );
+
+
+        frequencyData =
+            new Uint8Array(
+                analyser.frequencyBinCount
+            );
+
+
+        resizeVisualizer();
+
+    }
+
+
+    /* =========================
+       RESIZE CANVAS
+       ========================= */
+
+    function resizeVisualizer() {
+
+        if (!canvas || !ctx) {
+            return;
+        }
+
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+
+        const ratio =
+            window.devicePixelRatio || 1;
+
+
+        canvas.width =
+            rect.width * ratio;
+
+
+        canvas.height =
+            rect.height * ratio;
+
+
+        canvas.style.width =
+            rect.width + "px";
+
+
+        canvas.style.height =
+            rect.height + "px";
+
+
+        ctx.setTransform(
+            ratio,
+            0,
+            0,
+            ratio,
+            0,
+            0
+        );
+
+    }
+
+
+    window.addEventListener(
+        "resize",
+        resizeVisualizer
+    );
+
+
+    /* =========================
+       DRAW EQ
+       ========================= */
+
+    function drawVisualizer() {
+
+        requestAnimationFrame(
+            drawVisualizer
+        );
+
+
+        if (
+            !analyser ||
+            !frequencyData ||
+            !canvas ||
+            !ctx
+        ) {
+
+            return;
+
+        }
+
+
+        analyser.getByteFrequencyData(
+            frequencyData
+        );
+
+
+        const width =
+            canvas.clientWidth;
+
+
+        const height =
+            canvas.clientHeight;
+
+
+        ctx.clearRect(
+            0,
+            0,
+            width,
+            height
+        );
+
+
+        const barWidth =
+            width / BAND_COUNT;
+
+
+        const progress =
+            audio.duration
+                ? audio.currentTime /
+                  audio.duration
+                : 0;
+
+
+        for (
+            let i = 0;
+            i < BAND_COUNT;
+            i++
+        ) {
+
+            const index =
+                Math.floor(
+                    Math.pow(
+                        i / BAND_COUNT,
+                        1.7
+                    ) *
+                    frequencyData.length
+                );
+
+
+            const value =
+                frequencyData[index] / 255;
+
+
+            const boosted =
+                Math.pow(
+                    value,
+                    0.72
+                );
+
+
+            const barHeight =
+                boosted *
+                height *
+                0.9;
+
+
+            const hue =
+                (
+                    35 +
+                    (i / BAND_COUNT) * 170 +
+                    progress * 120
+                ) % 360;
+
+
+            const lightness =
+                55 +
+                boosted * 20;
+
+
+            ctx.fillStyle =
+                `hsl(
+                    ${hue},
+                    100%,
+                    ${lightness}%
+                )`;
+
+
+            const x =
+                i * barWidth;
+
+
+            const gap = 1;
+
+
+            ctx.fillRect(
+
+                x + gap,
+
+                height - barHeight,
+
+                Math.max(
+                    1,
+                    barWidth - gap * 2
+                ),
+
+                barHeight
+
+            );
 
         }
 
     }
-);
 
 
-/* =========================
-TRACK SELECTION
-========================= */
+    /* =========================
+       START VISUALISER LOOP
+       ========================= */
 
-trackItems.forEach((item) => {
+    if (canvas) {
 
-    item.addEventListener(
+        resizeVisualizer();
+
+        drawVisualizer();
+
+    }
+
+
+    /* =========================
+       PLAY / PAUSE
+       ========================= */
+
+    playButton.addEventListener(
         "click",
         function () {
 
-            const index =
-                Number(item.dataset.track);
+            if (audio.paused) {
 
-            loadTrack(index);
+                initVisualizer();
 
-            audio.play();
+                audio.play()
+                    .then(() => {
 
-            playButton.textContent = "❚❚";
+                        playButton.textContent =
+                            "❚❚";
+
+                    })
+                    .catch((error) => {
+
+                        console.error(
+                            "Audio playback failed:",
+                            error
+                        );
+
+                    });
+
+            } else {
+
+                audio.pause();
+
+                playButton.textContent =
+                    "▶";
+
+            }
 
         }
     );
+
+
+    /* =========================
+       TRACK SELECTION
+       ========================= */
+
+    trackItems.forEach(
+        (item) => {
+
+            item.addEventListener(
+                "click",
+                function () {
+
+                    const index =
+                        Number(
+                            item.dataset.track
+                        );
+
+
+                    loadTrack(index);
+
+                    initVisualizer();
+
+
+                    audio.play()
+                        .then(() => {
+
+                            playButton.textContent =
+                                "❚❚";
+
+                        })
+                        .catch((error) => {
+
+                            console.error(
+                                "Audio playback failed:",
+                                error
+                            );
+
+                        });
+
+                }
+            );
+
+        }
+    );
+
+
+    /* =========================
+       PROGRESS
+       ========================= */
+
+    audio.addEventListener(
+        "timeupdate",
+        function () {
+
+            if (!audio.duration) {
+                return;
+            }
+
+
+            const progress =
+                (
+                    audio.currentTime /
+                    audio.duration
+                ) * 100;
+
+
+            progressBar.style.width =
+                progress + "%";
+
+
+            const minutes =
+                Math.floor(
+                    audio.currentTime / 60
+                );
+
+
+            const seconds =
+                Math.floor(
+                    audio.currentTime % 60
+                )
+                .toString()
+                .padStart(2, "0");
+
+
+            time.textContent =
+                minutes + ":" + seconds;
+
+        }
+    );
+
+
+    /* =========================
+       DURATION
+       ========================= */
+
+    audio.addEventListener(
+        "loadedmetadata",
+        function () {
+
+            if (!audio.duration) {
+                return;
+            }
+
+
+            const minutes =
+                Math.floor(
+                    audio.duration / 60
+                );
+
+
+            const seconds =
+                Math.floor(
+                    audio.duration % 60
+                )
+                .toString()
+                .padStart(2, "0");
+
+
+            duration.textContent =
+                minutes + ":" + seconds;
+
+        }
+    );
+
+
+    /* =========================
+       SEEK
+       ========================= */
+
+    progressContainer.addEventListener(
+        "click",
+        function (event) {
+
+            if (!audio.duration) {
+                return;
+            }
+
+
+            const rect =
+                progressContainer.getBoundingClientRect();
+
+
+            const clickX =
+                event.clientX -
+                rect.left;
+
+
+            const width =
+                rect.width;
+
+
+            audio.currentTime =
+                (
+                    clickX / width
+                ) * audio.duration;
+
+        }
+    );
+
+
+    /* =========================
+       NEXT TRACK
+       ========================= */
+
+    audio.addEventListener(
+        "ended",
+        function () {
+
+            const nextTrack =
+                (
+                    currentTrack + 1
+                ) % tracks.length;
+
+
+            loadTrack(nextTrack);
+
+            initVisualizer();
+
+
+            audio.play()
+                .then(() => {
+
+                    playButton.textContent =
+                        "❚❚";
+
+                })
+                .catch((error) => {
+
+                    console.error(
+                        "Audio playback failed:",
+                        error
+                    );
+
+                });
+
+        }
+    );
+
+
+    /* =========================
+       AUDIO CONTEXT
+       ========================= */
+
+    audio.addEventListener(
+        "play",
+        function () {
+
+            initVisualizer();
+
+
+            if (
+                audioContext &&
+                audioContext.state ===
+                "suspended"
+            ) {
+
+                audioContext.resume();
+
+            }
+
+        }
+    );
+
+
+    /* =========================
+       INITIAL TRACK
+       ========================= */
+
+    loadTrack(0);
 
 });
-
-
-/* =========================
-PROGRESS
-========================= */
-
-audio.addEventListener(
-    "timeupdate",
-    function () {
-
-        if (!audio.duration) return;
-
-        const progress =
-            (audio.currentTime /
-            audio.duration) * 100;
-
-        progressBar.style.width =
-            progress + "%";
-
-
-        const minutes =
-            Math.floor(
-                audio.currentTime / 60
-            );
-
-        const seconds =
-            Math.floor(
-                audio.currentTime % 60
-            )
-            .toString()
-            .padStart(2, "0");
-
-
-        time.textContent =
-            minutes + ":" + seconds;
-
-    }
-);
-
-
-/* =========================
-DURATION
-========================= */
-
-audio.addEventListener(
-    "loadedmetadata",
-    function () {
-
-        const minutes =
-            Math.floor(
-                audio.duration / 60
-            );
-
-        const seconds =
-            Math.floor(
-                audio.duration % 60
-            )
-            .toString()
-            .padStart(2, "0");
-
-
-        duration.textContent =
-            minutes + ":" + seconds;
-
-    }
-);
-
-
-/* =========================
-SEEK
-========================= */
-
-progressContainer.addEventListener(
-    "click",
-    function (event) {
-
-        if (!audio.duration) return;
-
-        const width =
-            progressContainer.clientWidth;
-
-        const clickX =
-            event.offsetX;
-
-        audio.currentTime =
-            (clickX / width) *
-            audio.duration;
-
-    }
-);
-
-
-/* =========================
-NEXT TRACK
-========================= */
-
-audio.addEventListener(
-    "ended",
-    function () {
-
-        const nextTrack =
-            (currentTrack + 1) %
-            tracks.length;
-
-        loadTrack(nextTrack);
-
-        audio.play();
-
-        playButton.textContent = "❚❚";
-
-    }
-);
-
-
-/* =========================
-INITIAL TRACK
-========================= */
-
-loadTrack(0);
-
-</script>
-
-<script>
-
-const audio = document.getElementById("audio");
-const canvas = document.getElementById("eqVisualizer");
-const ctx = canvas.getContext("2d");
-
-let audioContext;
-let analyser;
-let source;
-let frequencyData;
-
-const BAND_COUNT = 64;
-
-
-/* =========================
-INITIALISE AUDIO ANALYSER
-========================= */
-
-function initVisualizer() {
-
-    if (audioContext) return;
-
-    audioContext =
-        new (window.AudioContext ||
-             window.webkitAudioContext)();
-
-    analyser =
-        audioContext.createAnalyser();
-
-    analyser.fftSize = 2048;
-
-    analyser.smoothingTimeConstant = 0.72;
-
-    source =
-        audioContext.createMediaElementSource(audio);
-
-    source.connect(analyser);
-
-    analyser.connect(
-        audioContext.destination
-    );
-
-    frequencyData =
-        new Uint8Array(
-            analyser.frequencyBinCount
-        );
-
-}
-
-
-/* =========================
-CANVAS SIZE
-========================= */
-
-function resizeVisualizer() {
-
-    const rect =
-        canvas.getBoundingClientRect();
-
-    canvas.width =
-        rect.width * window.devicePixelRatio;
-
-    canvas.height =
-        rect.height * window.devicePixelRatio;
-
-    ctx.setTransform(
-        window.devicePixelRatio,
-        0,
-        0,
-        window.devicePixelRatio,
-        0,
-        0
-    );
-
-}
-
-window.addEventListener(
-    "resize",
-    resizeVisualizer
-);
-
-resizeVisualizer();
-
-
-/* =========================
-DRAW EQ
-========================= */
-
-function drawVisualizer() {
-
-    requestAnimationFrame(
-        drawVisualizer
-    );
-
-    if (!analyser) return;
-
-    analyser.getByteFrequencyData(
-        frequencyData
-    );
-
-
-    const width =
-        canvas.clientWidth;
-
-    const height =
-        canvas.clientHeight;
-
-
-    ctx.clearRect(
-        0,
-        0,
-        width,
-        height
-    );
-
-
-    const barWidth =
-        width / BAND_COUNT;
-
-
-    /*
-     * Track progression
-     *
-     * 0 → 1 across the song
-     */
-
-    const progress =
-        audio.duration
-            ? audio.currentTime /
-              audio.duration
-            : 0;
-
-
-    for (
-        let i = 0;
-        i < BAND_COUNT;
-        i++
-    ) {
-
-        /*
-         * Spread the 64 bands across
-         * the useful frequency range.
-         */
-
-        const index =
-            Math.floor(
-                Math.pow(
-                    i / BAND_COUNT,
-                    1.7
-                ) *
-                frequencyData.length
-            );
-
-
-        const value =
-            frequencyData[index] / 255;
-
-
-        /*
-         * Give quieter frequencies
-         * a little extra life.
-         */
-
-        const boosted =
-            Math.pow(value, 0.72);
-
-
-        const barHeight =
-            boosted * height * 0.9;
-
-
-        /*
-         * Colour changes with:
-         *
-         * - frequency position
-         * - song progression
-         */
-
-        const hue =
-            (
-                35 +
-                (i / BAND_COUNT) * 170 +
-                progress * 120
-            ) % 360;
-
-
-        const saturation =
-            100;
-
-        const lightness =
-            55 +
-            boosted * 20;
-
-
-        ctx.fillStyle =
-            `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-
-
-        /*
-         * Tiny gaps between bars
-         */
-
-        const x =
-            i * barWidth;
-
-        const gap = 1;
-
-
-        ctx.fillRect(
-
-            x + gap,
-
-            height - barHeight,
-
-            Math.max(
-                1,
-                barWidth - gap * 2
-            ),
-
-            barHeight
-
-        );
-
-    }
-
-}
-
-drawVisualizer();
-
-
-/* =========================
-START AUDIO CONTEXT
-========================= */
-
-audio.addEventListener(
-    "play",
-    () => {
-
-        initVisualizer();
-
-        if (
-            audioContext.state ===
-            "suspended"
-        ) {
-
-            audioContext.resume();
-
-        }
-
-    }
-);
-
 </script>
 
 </body>

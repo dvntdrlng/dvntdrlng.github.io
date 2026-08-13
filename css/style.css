@@ -1283,18 +1283,19 @@ CONTROLS
 }
 
 
-.progress-wrapper {
+/* =========================
+   AUDIO PROGRESS / EQ
+   ========================= */
 
+.progress-wrapper {
     flex: 1;
 }
-
 
 .progress-container {
     width: 100%;
     height: 32px;
 
-    background:
-        rgba(255,255,255,0.08);
+    background: rgba(255, 255, 255, 0.08);
 
     cursor: pointer;
 
@@ -1304,10 +1305,15 @@ CONTROLS
 }
 
 
+/* =========================
+   EQ VISUALISER
+   ========================= */
+
 .eq-visualizer {
     position: absolute;
 
-    inset: 0;
+    left: 0;
+    top: 0;
 
     width: 100%;
     height: 100%;
@@ -1318,16 +1324,20 @@ CONTROLS
 }
 
 
+/* =========================
+   PROGRESS BAR
+   ========================= */
+
 .progress-bar {
-    width: 0%;
-    height: 100%;
-
-    background: var(--yellow);
-
     position: absolute;
 
     left: 0;
     top: 0;
+
+    width: 0%;
+    height: 100%;
+
+    background: var(--yellow);
 
     z-index: 1;
 
@@ -1352,41 +1362,11 @@ CONTROLS
 }
 
 
-.progress-bar {
-
-    width: 0%;
-
-    height: 100%;
-
-    background: var(--yellow);
-
-    position: relative;
-}
-
-
-/* Little glitch tail */
-
-.progress-bar::after {
-
-    content: "";
-
-    position: absolute;
-
-    right: 0;
-
-    top: -2px;
-
-    width: 4px;
-
-    height: 10px;
-
-    background: var(--glitch-pink);
-
-}
-
+/* =========================
+   TIME
+   ========================= */
 
 .time-row {
-
     display: flex;
 
     justify-content: space-between;
