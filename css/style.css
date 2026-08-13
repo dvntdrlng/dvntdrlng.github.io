@@ -1523,3 +1523,22 @@ TRACK LIST
     }
 
 }
+
+/* =========================
+   MOBILE FEATURE CARDS
+   ========================= */
+
+@media (max-width: 768px) {
+
+    .section-grid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .feature-card {
+        width: 100%;
+        max-width: 500px;
+    }
+
+}
